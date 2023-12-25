@@ -15,16 +15,16 @@ def read_csv():
     return objects
 
 
-def knapsack_fitness(chromosome, object):
+def knapsack_fitness(chromosome, object1):
     total_value = 0
     total_weight = 0
     total_size = 0.0
 
     for i in range(len(chromosome)):
         if chromosome[i] == 1:
-            total_value += int(object[i][2])
-            total_size += float(object[i][1])
-            total_weight += int(object[i][0])
+            total_value += int(object1[i][2])
+            total_size += float(object1[i][1])
+            total_weight += int(object1[i][0])
 
     if total_weight > 220 and total_size > 2.0:
         fitness = 0
@@ -61,7 +61,7 @@ def population(objects):
     return population
 
 def mutation(child):
-    n = random.randint(0,28)
+    n = random.randint(20, 26)
     child[n] = random.randrange(2)
     return child
 
@@ -69,10 +69,10 @@ def mutation(child):
 def crossover(population, objects):
     children = []
     for k in range(0, 200, 2):
-        child = population[k + 1]['gen'][(29 // 2):] + population[k]['gen'][:(29 // 2)]
+        child = population[k]['gen'][:(29 // 2)] + population[k + 1]['gen'][(29 // 2):]
         children.append(child)
         value = knapsack_fitness(child, objects)
-        if(random.randint(0,10)> 0):
+        if(random.randint(0,10)> 5):
             mutated_child = mutation(child)
             mutated_value = knapsack_fitness(mutated_child, objects)
             population.append({'gen': mutated_child, 'value': mutated_value})
@@ -91,7 +91,7 @@ if __name__ == '__main__':
     i = 0
     print(sorted_list[0])
     maxx = sorted_list[0]['value']
-    while i < 400:
+    while i < 300:
         sorted_list = crossover(sorted_list, objects)
         sorted_list = sorted(sorted_list, key=lambda x: x["value"], reverse=True)
         if (sorted_list[0]['value'] > maxx):
