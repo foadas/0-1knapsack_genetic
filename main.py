@@ -53,6 +53,7 @@ def check_population(pop, population):
 def population(objects):
     i = 0
     population = []
+    random.shuffle(objects)
     while (i < 200):
         total_weight = 0
         total_size = 0.0
@@ -87,7 +88,7 @@ def mutation(child):
 
 def crossover(population, objects2):
     children = []
-    for k in range(0, 100):
+    for k in range(0, 200):
         break_p = random.randint(0, len(population))
         child = population[k]['gen'][:break_p] + population[k+1]['gen'][break_p:]
         child2 =  population[len(population)-1]['gen'][break_p:] + population[k]['gen'][:break_p]
@@ -114,6 +115,7 @@ if __name__ == '__main__':
     sorted_list = sorted(values, key=lambda x: x["value"], reverse=True)
     i = 0
     print(sorted_list[0])
+    answers.append(sorted_list[0])
    # maxx = sorted_list[0]['value']
     while i < 300:
         sorted_list = crossover(sorted_list, objects)
@@ -121,10 +123,6 @@ if __name__ == '__main__':
         sorted_list = sorted(sorted_list, key=lambda x: x["value"], reverse=True)
        # if (sorted_list[0]['value'] > maxx):
        #     maxx = sorted_list[0]['value']
-
         i += 1
     answers = sorted(answers, key=lambda x: x["value"], reverse=True)
     print(answers[0])
-
-
-
