@@ -1,9 +1,10 @@
 import csv
+import math
 import random
 
 values = []
 
-
+answers = []
 def read_csv():
     file_path = 'backpack_objects.csv'
     objects = []
@@ -26,13 +27,29 @@ def knapsack_fitness(chromosome, object1):
             total_size += float(object1[i][1])
             total_weight += int(object1[i][0])
 
-    if total_weight > 220 and total_size > 2.0:
+    if total_weight > 220 or total_size > 2.0:
         fitness = 0
     else:
         fitness = total_value
     return fitness
 
+def fitness(chromosome, object1):
+    total_value = 0
+    total_weight = 0
+    total_size = 0.0
+    for i in range(len(chromosome)):
+        if chromosome[i] == 1:
+            total_value += int(object1[i][2])
+            total_size += float(object1[i][1])
+            total_weight += int(object1[i][0])
 
+    fitnesss = total_value - (abs(220 - total_weight)) + (abs(2.0 - total_size))
+    return fitnesss
+
+def check_population(pop, population):
+    if pop in population:
+        return True
+    return False
 def population(objects):
     i = 0
     population = []
@@ -40,43 +57,50 @@ def population(objects):
         total_weight = 0
         total_size = 0.0
         j = 0
-        selections = []
+        chromosome = []
         while (j < len(objects)):
-            take = random.randrange(2)
+            take = random.randint(0, 1)
             if take == 1:
                 if (total_weight + int(objects[j][0]) <= 220 and total_size + float(objects[j][1]) <= 2.0):
                     total_weight += int(objects[j][0])
                     total_size += float(objects[j][1])
-                    selections.append(take)
+                    chromosome.append(take)
                 else:
-                    selections.append(0)
+                    chromosome.append(0)
             else:
-                selections.append(0)
+                chromosome.append(0)
 
             j += 1
-        population.append(selections)
-        value = knapsack_fitness(selections, objects)
-        values.append({'gen': selections, 'value': value})
-        i += 1
+        if not check_population(chromosome, population):
+            population.append(chromosome)
+            value = knapsack_fitness(chromosome, objects)
+            values.append({'gen': chromosome, 'value': value})
+            i += 1
+
     return population
 
 def mutation(child):
-    n = random.randint(20, 26)
-    child[n] = random.randrange(2)
+    n = random.randint(24, 28)
+    child[n] = 1 - child[n]
     return child
 
 
-def crossover(population, objects):
+def crossover(population, objects2):
     children = []
-    for k in range(0, 200, 2):
-        child = population[k]['gen'][:(29 // 2)] + population[k + 1]['gen'][(29 // 2):]
-        children.append(child)
-        value = knapsack_fitness(child, objects)
+    for k in range(0, 100):
+        break_p = random.randint(0, len(population))
+        child = population[k]['gen'][:break_p] + population[k+1]['gen'][break_p:]
+        child2 =  population[len(population)-1]['gen'][break_p:] + population[k]['gen'][:break_p]
+        # children.append(child1)
+        value = fitness(child, objects2)
         if(random.randint(0,10)> 5):
             mutated_child = mutation(child)
-            mutated_value = knapsack_fitness(mutated_child, objects)
+            mutated_value = fitness(mutated_child, objects2)
+            val = knapsack_fitness(mutated_child, objects2)
+            answers.append({'gen': mutated_child, 'value': val})
             population.append({'gen': mutated_child, 'value': mutated_value})
-
+        answers.append({'gen': child, 'value': knapsack_fitness(child, objects2)})
+        answers.append({'gen': child2, 'value': knapsack_fitness(child2, objects2)})
         population.append({'gen': child, 'value': value})
 
     return population
@@ -90,16 +114,17 @@ if __name__ == '__main__':
     sorted_list = sorted(values, key=lambda x: x["value"], reverse=True)
     i = 0
     print(sorted_list[0])
-    maxx = sorted_list[0]['value']
+   # maxx = sorted_list[0]['value']
     while i < 300:
         sorted_list = crossover(sorted_list, objects)
+        sorted_list = sorted_list[-200:]
         sorted_list = sorted(sorted_list, key=lambda x: x["value"], reverse=True)
-        if (sorted_list[0]['value'] > maxx):
-            maxx = sorted_list[0]['value']
+       # if (sorted_list[0]['value'] > maxx):
+       #     maxx = sorted_list[0]['value']
 
         i += 1
-    print(sorted_list[0]['value'])
-    print(maxx)
+    answers = sorted(answers, key=lambda x: x["value"], reverse=True)
+    print(answers[0])
 
 
 
