@@ -3,7 +3,7 @@ import math
 import random
 
 values = []
-
+all_fitnesses = []
 answers = []
 def read_csv():
     file_path = 'backpack_objects.csv'
@@ -43,7 +43,7 @@ def fitness(chromosome, object1):
             total_size += float(object1[i][1])
             total_weight += int(object1[i][0])
 
-    fitnesss = total_value - (abs(220 - total_weight)) + (abs(2.0 - total_size))
+    fitnesss = round(total_value - (abs(220 - total_weight)) + (abs(2.0 - total_size)))
     return fitnesss
 
 def check_population(pop, population):
@@ -85,26 +85,40 @@ def mutation(child):
     child[n] = 1 - child[n]
     return child
 
+def selection(chrom_dict, sum_fitnesses):
+    random_select = random.randint(1, sum_fitnesses)
+    wheel = 0
+    while wheel < random_select:
+        for item in chrom_dict:
+            if wheel + item['value'] >= random_select:
+                return item['gen']
+            wheel += item['value']
 
 def crossover(population, objects2):
     children = []
-    for k in range(0, 200):
+    sum_of_values = sum(item['value'] for item in population)
+    for k in range(0, len(population)):
         break_p = random.randint(0, len(population))
-        child = population[k]['gen'][:break_p] + population[k+1]['gen'][break_p:]
-        child2 =  population[len(population)-1]['gen'][break_p:] + population[k]['gen'][:break_p]
+        first_chromosome = selection(population, sum_of_values)
+        seceond_chromosme = selection(population, sum_of_values)
+        if k == len(population)-1:
+            break
+        child = first_chromosome[:break_p] + seceond_chromosme[break_p:]
+        # child2 = population[k+1]['gen'][break_p:] + population[k]['gen'][:break_p]
         # children.append(child1)
         value = fitness(child, objects2)
+        # value2 = fitness(child2, objects2)
         if(random.randint(0,10)> 5):
             mutated_child = mutation(child)
             mutated_value = fitness(mutated_child, objects2)
             val = knapsack_fitness(mutated_child, objects2)
             answers.append({'gen': mutated_child, 'value': val})
-            population.append({'gen': mutated_child, 'value': mutated_value})
+            children.append({'gen': mutated_child, 'value': mutated_value})
         answers.append({'gen': child, 'value': knapsack_fitness(child, objects2)})
-        answers.append({'gen': child2, 'value': knapsack_fitness(child2, objects2)})
-        population.append({'gen': child, 'value': value})
-
-    return population
+        # answers.append({'gen': child2, 'value': knapsack_fitness(child2, objects2)})
+        children.append({'gen': child, 'value': value})
+        # children.append({'gen': child2, 'value': value})
+    return children
 
 
 if __name__ == '__main__':
@@ -114,7 +128,7 @@ if __name__ == '__main__':
     population = population(objects)
     sorted_list = sorted(values, key=lambda x: x["value"], reverse=True)
     i = 0
-    print(sorted_list[0])
+    print(sorted_list)
     answers.append(sorted_list[0])
    # maxx = sorted_list[0]['value']
     while i < 300:
